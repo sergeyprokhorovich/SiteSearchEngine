@@ -1,0 +1,37 @@
+# example values
+
+indexing-settings:
+  sites:
+    - url: https://lenta.ru
+      name: Лента.ру
+    - url: https://skillbox.ru
+      name: Skillbox
+    - url: https://playback.ru
+      name: PlayBack.Ru
+    - url: https://tgt.by
+      name: tgt.by
+
+# user properties
+user-properties:
+  nameUserAgent: indexBot
+  referUserSite: https://github.com/sergeyprokhorovich/SiteSearchEngine
+  pageLimit: 30
+
+# conf server
+
+server:
+ port: 8080
+
+# conf db in spring
+spring:
+  datasource:
+    username: root
+    password: passroot
+    url: jdbc:mysql://localhost:3306/search_engine?useSSL=false&requireSSL=false&allowPublicKeyRetrieval=true
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
