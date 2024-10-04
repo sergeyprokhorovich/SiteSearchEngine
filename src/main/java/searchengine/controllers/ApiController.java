@@ -1,6 +1,6 @@
 package searchengine.controllers;
 
-import org.springframework.http.ResponseEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import searchengine.dto.indexing.IndexingResponse;
 import searchengine.dto.indexing.UrlPage;
@@ -12,6 +12,7 @@ import searchengine.services.SearchService;
 import searchengine.services.StatisticsService;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api")
 public class ApiController {
 
@@ -19,32 +20,26 @@ public class ApiController {
     private final IndexingService indexingService;
     private final SearchService searchService;
 
-    public ApiController(StatisticsService statisticsService, IndexingService indexingService, SearchService searchService) {
-        this.statisticsService = statisticsService;
-        this.indexingService = indexingService;
-        this.searchService = searchService;
-    }
-
     @GetMapping("/statistics")
-    public ResponseEntity<StatisticsResponse> statistics() {
-        return ResponseEntity.ok(statisticsService.getStatistics());
+    public StatisticsResponse statistics() {
+        return statisticsService.getStatistics();
     }
     @GetMapping("/startIndexing")
-    public ResponseEntity<IndexingResponse> startIndexing() {
-        return ResponseEntity.ok(indexingService.startIndexing());
+    public IndexingResponse startIndexing() {
+        return indexingService.startIndexing();
     }
     @GetMapping("/stopIndexing")
-    public ResponseEntity<IndexingResponse> stopIndexing() {
-        return ResponseEntity.ok(indexingService.stopIndexing());
+    public IndexingResponse stopIndexing() {
+        return indexingService.stopIndexing();
     }
 
     @PostMapping("/indexPage")
-    public ResponseEntity<IndexingResponse> startIndexingOnePage(@ModelAttribute UrlPage urlPage){
-        return ResponseEntity.ok(indexingService.startIndexingOnePage(urlPage.getUrl()));
+    public IndexingResponse startIndexingOnePage(@ModelAttribute UrlPage urlPage){
+        return indexingService.startIndexingOnePage(urlPage.getUrl());
     }
 
     @GetMapping("/search")
-    public ResponseEntity<SearchResponse> searchByQuery (@ModelAttribute SiteRequest siteRequest){
-        return ResponseEntity.ok(searchService.findPagesByQuery(siteRequest));
+    public SearchResponse searchByQuery (@ModelAttribute SiteRequest siteRequest){
+        return searchService.findPagesByQuery(siteRequest);
     }
 }

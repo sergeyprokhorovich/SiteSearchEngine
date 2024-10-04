@@ -1,0 +1,139 @@
+databaseChangeLog:
+  - changeSet:
+        id: create_site_entity_table
+        author: sergey_p
+        changes:
+          - createTable:
+              tableName: site
+              columns:
+                - column:
+                    name: id
+                    type: BIGINT
+                    autoIncrement: true
+                    constraints:
+                      primaryKey: true
+                - column:
+                    name: status
+                    type: VARCHAR(255)
+                    constraints:
+                      notNull: true
+                - column:
+                    name: status_time
+                    type: DATETIME
+                    constraints:
+                      notNull: true
+                - column:
+                    name: last_error
+                    type: VARCHAR(255)
+                - column:
+                    name: url
+                    type: VARCHAR(255)
+                    constraints:
+                      notNull: true
+                - column:
+                    name: name
+                    type: VARCHAR(255)
+                    constraints:
+                      notNull: true
+  - changeSet:
+        id: create_page_entity_table
+        author: sergey_p
+        changes:
+          - createTable:
+              tableName: page
+              columns:
+                - column:
+                    name: id
+                    type: BIGINT
+                    autoIncrement: true
+                    constraints:
+                      primaryKey: true
+                      nullable: false
+                - column:
+                    name: site_id
+                    type: BIGINT
+                    constraints:
+                      foreignKeyName: FK_page_site_id
+                      references: site(id)
+                - column:
+                   name: path
+                   type: VARCHAR(255)
+                   constraints:
+                      notNull: true
+                - column:
+                   name: code
+                   type: INTEGER
+                   constraints:
+                      notNull: true
+                - column:
+                   name: content
+                   type: MEDIUMTEXT
+                   constraints:
+                      notNull: true
+                      defaultValue: ''
+  - changeSet:
+      id: createIndexByPathS
+      author: sergey_p
+      changes:
+        - sql:
+            sql: CREATE INDEX idx_path ON page(path);
+  - changeSet:
+        id: create_lemma_entity_table
+        author: sergey_p
+        changes:
+          - createTable:
+              tableName: lemma
+              columns:
+                - column:
+                    name: id
+                    type: INTEGER
+                    autoIncrement: true
+                    constraints:
+                      primaryKey: true
+                      notNull: true
+                - column:
+                    name: site_id
+                    type: BIGINT
+                    constraints:
+                      foreignKeyName: FK_lemma_site_id
+                      references: site(id)
+                - column:
+                    name: lemma
+                    type: VARCHAR(255)
+                    constraints:
+                      notNull: true
+                - column:
+                    name: frequency
+                    type: INTEGER
+                    constraints:
+                      notNull: true
+  - changeSet:
+        id: create_index_entity_table
+        author: sergey_p
+        changes:
+          - createTable:
+              tableName: lemma_index
+              columns:
+                - column:
+                    name: id
+                    type: INTEGER
+                    autoIncrement: true
+                    constraints:
+                      primaryKey: true
+                - column:
+                    name: page_id
+                    type: BIGINT
+                    constraints:
+                      foreignKeyName: FK_index_page_id
+                      references: page(id)
+                - column:
+                   name: lemma_id
+                   type: INTEGER
+                   constraints:
+                      foreignKeyName: FK_index_lemma_id
+                      references: lemma(id)
+                - column:
+                   name: page_rank
+                   type: FLOAT
+                   constraints:
+                      nullable: false

@@ -28,11 +28,11 @@ public class SiteParserLauncher {
         setStatusIndexing(site);
         site.setStopIndexing(false);
         ForkJoinPool pool = new ForkJoinPool();
-        SiteParserDataSet siteParseDataSet = new SiteParserDataSet(this.indexRepository ,this.lemmaRepository,this.pageRepository,this.siteRepository);
+        SiteParserDataSet siteParseDataSet = new SiteParserDataSet(siteRepository,pageRepository,indexRepository,lemmaRepository);
         siteParseDataSet.setDomain(site);
         siteParseDataSet.setUserProperties(userAgent);
         String startingUrl = siteParseDataSet.getDomain();
-        SiteParser siteParser = new SiteParser(startingUrl, siteParseDataSet,pageIndexing);
+        SiteParser siteParser = new SiteParser(startingUrl, siteParseDataSet, pageIndexing);
         pool.execute(siteParser);
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
@@ -48,7 +48,6 @@ public class SiteParserLauncher {
                     }
                 }
             } while (!siteParser.isDone());
-            System.out.println("Индексация сайта " + siteParseDataSet.getDomain() + " окончена" );
             if(!site.getStopIndexing()){
                 setStatusIndexed(siteParseDataSet.getDomain());
             }else{

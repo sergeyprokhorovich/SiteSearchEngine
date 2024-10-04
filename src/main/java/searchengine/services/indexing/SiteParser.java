@@ -1,4 +1,5 @@
 package searchengine.services.indexing;
+import lombok.RequiredArgsConstructor;
 import org.jsoup.Connection;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
@@ -20,29 +21,13 @@ import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.TimeUnit;
 
+@RequiredArgsConstructor
 public class SiteParser extends RecursiveAction {
-    private final String parsUrl;
-    private final SiteParserDataSet siteParseDataSet;
     private final int timetosleep = 3000;
     private final int timetoconnect = 10000;
-    private final SiteRepository siteRepository;
-    private final PageRepository pageRepository;
-    private final String userAgent;
-    private final Integer countPage;
-    private final IndexingOfManyPages pageIndexing;
-
-    private final SiteEntity siteEntity;
-
-    public SiteParser(String parsUrl, SiteParserDataSet siteParseDataSet, IndexingOfManyPages pageIndexing) {
-        this.parsUrl = parsUrl;
-        this.siteParseDataSet = siteParseDataSet;
-        this.siteRepository = siteParseDataSet.getSiteRepository();
-        this.pageRepository = siteParseDataSet.getPageRepository();
-        this.userAgent = siteParseDataSet.getUserProperties().getNameUserAgent();
-        this.countPage = siteParseDataSet.getUserProperties().getPageLimit();
-        this.pageIndexing = pageIndexing;
-        siteEntity =  siteRepository.findByUrl(siteParseDataSet.getDomain());
-    }
+    private final String parsUrl;
+    private final SiteParserDataSet siteParseDataSet;
+    private final IndexingOfManyPages indexingOfManyPages;
     @Override
     protected void compute()  {
         ForkJoinTask.invokeAll(createSubtasks());
@@ -54,7 +39,7 @@ public class SiteParser extends RecursiveAction {
             if(!listLinks.isEmpty()) {
                 for (String url : listLinks) {
                     siteParseDataSet.addLink(url);
-                    SiteParser task = new SiteParser(url, siteParseDataSet,pageIndexing);
+                    SiteParser task = new SiteParser(url, siteParseDataSet, indexingOfManyPages);
                     subtask.add(task);
                 }
             }
@@ -67,6 +52,7 @@ public class SiteParser extends RecursiveAction {
         try {
             TimeUnit.MILLISECONDS.sleep(timetosleep);
         } catch (InterruptedException ignored){}
+        String userAgent = siteParseDataSet.getUserProperties().getNameUserAgent();
         Connection connection = Jsoup.connect(parsUrl).userAgent(userAgent);
         connection.ignoreContentType(true);
         connection.timeout(timetoconnect);
@@ -81,7 +67,7 @@ public class SiteParser extends RecursiveAction {
                 page.setUrl(parsUrl);
                 PageEntity pageEntity =  addPageRepository(page);
                 if (pageEntity != null) {
-                    pageIndexing.indexingPage(pageEntity);
+                    indexingOfManyPages.indexingPage(pageEntity);
                 }
             }
             listLink = getLinks(links);
@@ -113,6 +99,7 @@ public class SiteParser extends RecursiveAction {
         String msg = "При проверке URL  " + url + " ";
         try {
             TimeUnit.MILLISECONDS.sleep(timetosleep);
+            String userAgent = siteParseDataSet.getUserProperties().getNameUserAgent();
             Connection connection = Jsoup.connect(url).userAgent(userAgent);
             connection.ignoreContentType(true);
             connection.get();
@@ -138,6 +125,9 @@ public class SiteParser extends RecursiveAction {
         return false;
     }
     private PageEntity addPageRepository(Page page){
+        SiteRepository siteRepository = siteParseDataSet.getSiteRepository();
+        PageRepository pageRepository = siteParseDataSet.getPageRepository();
+        SiteEntity siteEntity = siteRepository.findByUrl(siteParseDataSet.getDomain());
         Optional<PageEntity> pageOptional =  Optional.ofNullable(pageRepository.findPageByPathAndSiteEntity(page.getUrl(),siteEntity));
         if (pageOptional.isEmpty()){
             PageEntity pageEntity = new PageEntity();
@@ -150,6 +140,9 @@ public class SiteParser extends RecursiveAction {
         return null;
     }
     private boolean checkPageExist(String url){
+        PageRepository pageRepository = siteParseDataSet.getPageRepository();
+        SiteRepository siteRepository = siteParseDataSet.getSiteRepository();
+        SiteEntity siteEntity = siteRepository.findByUrl(siteParseDataSet.getDomain());
         Optional<PageEntity> pageOptional =  Optional.ofNullable(pageRepository.findPageByPathAndSiteEntity(url,siteEntity));
         return pageOptional.isPresent();
     }
@@ -164,6 +157,7 @@ public class SiteParser extends RecursiveAction {
         if (siteParseDataSet.containLinksInWork(url)) {
             mySwitch++;
         }
+        Integer countPage = siteParseDataSet.getUserProperties().getPageLimit();
         if (countPage !=null ) {
             if(siteParseDataSet.getSize() > countPage) {
                mySwitch++;

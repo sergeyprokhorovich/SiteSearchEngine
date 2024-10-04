@@ -1,5 +1,4 @@
 # example values
-
 indexing-settings:
   sites:
     - url: https://lenta.ru
@@ -15,23 +14,20 @@ indexing-settings:
 user-properties:
   nameUserAgent: indexBot
   referUserSite: https://github.com/sergeyprokhorovich/SiteSearchEngine
-  pageLimit: 30
-
+  pageLimit: 5
 # conf server
-
 server:
  port: 8080
-
 # conf db in spring
 spring:
   datasource:
-    username: root
-    password: passroot
-    url: jdbc:mysql://localhost:3306/search_engine?useSSL=false&requireSSL=false&allowPublicKeyRetrieval=true
+    username: myuser
+    password: mypass
+    url: jdbc:postgresql://localhost:5432/search_engine?useUnicode=yes&characterEncoding=UTF-8
+    driver-class-name: org.postgresql.Driver
   jpa:
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
-    hibernate:
-      ddl-auto: update
     show-sql: true
+    hibernate:
+      ddl-auto: none
+  liquibase:
+    enabled: true

@@ -1,6 +1,7 @@
 package searchengine.dto.indexing;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import searchengine.config.Site;
 import searchengine.config.UserProperties;
@@ -13,7 +14,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-
+@RequiredArgsConstructor
 public class SiteParserDataSet {
     @Getter
     private final SiteRepository siteRepository;
@@ -28,16 +29,7 @@ public class SiteParserDataSet {
     @Getter
     @Setter
     private UserProperties userProperties;
-
     private final Set<String> linksInWork = Collections.synchronizedSet(new HashSet<>());
-
-    public SiteParserDataSet(IndexRepository indexRepository, LemmaRepository lemmaRepository, PageRepository pageRepository, SiteRepository siteRepository) {
-        this.siteRepository = siteRepository;
-        this.pageRepository = pageRepository;
-        this.indexRepository = indexRepository;
-        this.lemmaRepository = lemmaRepository;
-    }
-
     public void setDomain(Site site) {
         this.domain = site.getUrl().replaceAll("/+$", "");
         linksInWork.add(domain);
@@ -49,7 +41,6 @@ public class SiteParserDataSet {
     public int getSize(){
         return linksInWork.size();
     }
-
     public boolean containLinksInWork(String url){return linksInWork.contains(url);}
 
 
